@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>cps_exp Drills</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: left rail lists the nine match arms; main pane is the exam skeleton with one live arm, then the test bench. */
+:root {
+  --bg: #eef1f6;
+  --panel: #ffffff;
+  --ink: #13294b;
+  --muted: #5b6b84;
+  --line: #d5dce7;
+  --accent: #e84a27;
+  --accent-soft: #fde7e0;
+  --code: #f6f8fb;
+  --kw: #b4361a;
+  --ctor: #1d5fa8;
+  --cmt: #7d8aa0;
+  --str: #2f7d4a;
+  --ok: #1f7a4d;
+  --ok-soft: #e1f3e8;
+  --bad: #b42318;
+  --bad-soft: #fde4e1;
+  --warn: #9a5b00;
+  --warn-soft: #fbefd6;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1424; --panel: #111d33; --ink: #e5ebf5; --muted: #93a2ba; --line: #24365a;
+    --accent: #ff6b47; --accent-soft: #3a1d17; --code: #0c1629;
+    --kw: #ff9a7a; --ctor: #79bdfc; --cmt: #6c7d98; --str: #8fd9a3;
+    --ok: #4bd08a; --ok-soft: #12301f; --bad: #ff7b6e; --bad-soft: #3a1714; --warn: #f5c04a; --warn-soft: #33270c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1424; --panel: #111d33; --ink: #e5ebf5; --muted: #93a2ba; --line: #24365a;
+  --accent: #ff6b47; --accent-soft: #3a1d17; --code: #0c1629;
+  --kw: #ff9a7a; --ctor: #79bdfc; --cmt: #6c7d98; --str: #8fd9a3;
+  --ok: #4bd08a; --ok-soft: #12301f; --bad: #ff7b6e; --bad-soft: #3a1714; --warn: #f5c04a; --warn-soft: #33270c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+code, pre, textarea, .mono { font-family: var(--font-mono); font-size: 13px; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px;
+  padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand b { font-family: var(--font-mono); font-size: 18px; letter-spacing: -0.01em; }
+.brand b span { color: var(--accent); }
+.brand small { color: var(--muted); font-size: 13px; }
+.top .spacer { flex: 1; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.progress { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.progress b { color: var(--ink); }
+
+.wrap {
+  display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 24px; max-width: 1240px; margin: 0 auto;
+  padding-block: 20px 60px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+nav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); align-self: start; }
+nav .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 10px 10px 6px; }
+nav button {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: none; border: 1px solid transparent; border-radius: 6px; padding: 7px 10px; color: var(--ink); cursor: pointer;
+}
+nav button:hover { background: var(--panel); border-color: var(--line); }
+nav button.on { background: var(--panel); border-color: var(--ink); }
+nav button code { font-size: 12.5px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; }
+.dot.ok { background: var(--ok); border-color: var(--ok); }
+.dot.bad { background: var(--bad); border-color: var(--bad); }
+nav .exam code { font-weight: 700; }
+
+main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; min-width: 0; }
+.head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; }
+.head h1 { margin: 0; font-size: 20px; font-weight: 600; text-wrap: balance; }
+.head h1 code { font-size: 19px; }
+.pill { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; background: var(--code); color: var(--muted); border: 1px solid var(--line); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.pill.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.rule { margin: 14px 0 0; padding: 10px 14px; background: var(--accent-soft); border-radius: 6px; font-family: var(--font-mono); font-size: 13.5px; overflow-x: auto; white-space: pre; }
+.rule .lbl { font-family: var(--font-body); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); display: block; margin-bottom: 2px; font-weight: 700; }
+.scope { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; align-items: center; }
+.scope .lbl { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.scope code { background: var(--code); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+.scope code i { font-style: normal; color: var(--muted); }
+
+.editor { margin-top: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--code); overflow: hidden; }
+.editor pre { margin: 0; padding: 0 14px; white-space: pre; overflow-x: auto; line-height: 1.6; }
+.editor pre.first { padding-top: 12px; }
+.editor pre.last { padding-bottom: 12px; }
+.editor .dim { opacity: 0.55; }
+.slot { display: block; padding: 4px 14px 8px 14px; }
+.slot textarea {
+  display: block; width: 100%; resize: vertical; min-height: 4.8em; line-height: 1.6; padding: 8px 10px; tab-size: 3;
+  background: var(--panel); color: var(--ink); border: 1.5px dashed var(--accent); border-radius: 5px;
+}
+.slot textarea:focus { border-style: solid; outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.tok-kw { color: var(--kw); font-weight: 500; }
+.tok-ctor { color: var(--ctor); }
+.tok-cmt { color: var(--cmt); font-style: italic; }
+.tok-str { color: var(--str); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 14px; }
+.btn:hover { border-color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn kbd { font-family: var(--font-mono); font-size: 11px; opacity: 0.8; margin-left: 6px; }
+.actions .note { font-size: 12.5px; color: var(--muted); }
+
+.hints { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.hint { border-left: 3px solid var(--warn); background: var(--warn-soft); padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 14px; }
+.hint pre { margin: 6px 0 0; white-space: pre-wrap; }
+.solution { margin-top: 14px; }
+.solution pre { margin: 6px 0 0; padding: 12px 14px; background: var(--code); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+.solution .lbl { font-size: 12px; color: var(--muted); }
+
+.summary { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.summary h2 { margin: 0; font-size: 16px; }
+.bar { flex: 1; min-width: 120px; height: 8px; background: var(--code); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; }
+.bar .p { background: var(--ok); }
+.bar .f { background: var(--bad); }
+.count { font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 14px; }
+.tests { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.test { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; min-width: 0; }
+.test.fail { border-color: var(--bad); }
+.test .row { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.test .in { font-family: var(--font-mono); font-size: 13px; overflow-wrap: anywhere; min-width: 0; flex: 1; }
+.test .tag { font-size: 11px; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 4px 10px; margin-top: 8px; font-size: 13px; }
+.kv dt { color: var(--muted); font-size: 12px; padding-top: 1px; }
+.kv dd { margin: 0; font-family: var(--font-mono); overflow-wrap: anywhere; min-width: 0; }
+.diag { margin-top: 8px; font-size: 13.5px; }
+.diag code { background: var(--code); padding: 0 4px; border-radius: 3px; overflow-wrap: anywhere; }
+.test details { margin-top: 8px; font-size: 12.5px; }
+.test details summary { cursor: pointer; color: var(--muted); }
+.test details pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0 0; padding: 8px 10px; background: var(--code); border-radius: 4px; }
+.err { border-left: 3px solid var(--bad); background: var(--bad-soft); padding: 10px 12px; border-radius: 0 6px 6px 0; font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+details.types summary { cursor: pointer; font-weight: 600; }
+details.types pre { overflow-x: auto; margin: 12px 0 0; padding: 12px 14px; background: var(--code); border-radius: 6px; line-height: 1.55; }
+details.types p { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+.ac { position: fixed; z-index: 50; width: min(460px, calc(100vw - 32px)); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 28px rgba(8, 18, 38, 0.22); font-family: var(--font-mono); font-size: 12.5px; overflow: hidden; }
+.ac ul { list-style: none; margin: 0; padding: 3px; max-height: 214px; overflow-y: auto; }
+.ac li { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.ac li.sel { background: var(--accent-soft); }
+.ac .lb { flex: none; }
+.ac .lb b { color: var(--accent); font-weight: 700; }
+.ac .dt { margin-left: auto; padding-left: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; min-width: 0; font-size: 11.5px; }
+.ki { width: 16px; height: 16px; border-radius: 3px; display: inline-grid; place-items: center; font-size: 10.5px; font-weight: 700; color: var(--panel); flex: none; }
+.ki-ctor { background: var(--ctor); }
+.ki-fn { background: var(--accent); }
+.ki-var { background: var(--str); }
+.ki-kw { background: var(--kw); }
+.ac .doc { border-top: 1px solid var(--line); padding: 7px 10px; background: var(--code); font-size: 12px; overflow-wrap: anywhere; }
+.ac .doc p { margin: 3px 0 0; color: var(--cmt); font-style: italic; }
+.ac .keys { border-top: 1px solid var(--line); padding: 4px 10px; color: var(--muted); font-family: var(--font-body); font-size: 11.5px; }
+@media (max-width: 820px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
+  nav .label { display: none; }
+  nav button { width: auto; flex: none; border-color: var(--line); background: var(--panel); }
+  .card { padding: 14px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .test { animation: in .18s ease-out both; }
+  @keyframes in { from { transform: translateY(3px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<header class="top">
+  <div class="brand"><b>cps_exp<span>.</span>drills</b><small>CS 421 · MP Problem 5 · CPS transform for PicoML</small></div>
+  <div class="spacer"></div>
+  <label class="toggle" for="hard"><input type="checkbox" id="hard"> Hide rule comments (exam mode)</label>
+  <span class="progress" id="progress"></span>
+</header>
+<div class="wrap">
+  <nav id="nav" aria-label="Match arms"></nav>
+  <main id="main"></main>
+</div>
+
+<script id="engine">
+// ---------- types (mirrors common.ml) ----------
+const CTORS = {
+  BoolConst:['const',['bool']], IntConst:['const',['int']], FloatConst:['const',['float']], StringConst:['const',['string']], NilConst:['const',[]], UnitConst:['const',[]],
+  IntNegOp:['mon',[]], HdOp:['mon',[]], TlOp:['mon',[]], FstOp:['mon',[]], SndOp:['mon',[]],
+  IntPlusOp:['bin',[]], IntMinusOp:['bin',[]], IntTimesOp:['bin',[]], IntDivOp:['bin',[]], FloatPlusOp:['bin',[]], FloatMinusOp:['bin',[]], FloatTimesOp:['bin',[]], FloatDivOp:['bin',[]], ConcatOp:['bin',[]], ConsOp:['bin',[]], CommaOp:['bin',[]], EqOp:['bin',[]], GreaterOp:['bin',[]],
+  VarExp:['exp',['string']], ConstExp:['exp',['const']], MonOpAppExp:['exp',['mon','exp']], BinOpAppExp:['exp',['bin','exp','exp']], IfExp:['exp',['exp','exp','exp']], AppExp:['exp',['exp','exp']], FunExp:['exp',['string','exp']], LetInExp:['exp',['string','exp','exp']], LetRecInExp:['exp',['string','string','exp','exp']],
+  Kvar:['contvar',[]],
+  External:['cont',[]], ContVarCPS:['cont',['contvar']], FnContCPS:['cont',['string','expcps']],
+  VarCPS:['expcps',['cont','string']], ConstCPS:['expcps',['cont','const']], MonOpAppCPS:['expcps',['cont','mon','string']], BinOpAppCPS:['expcps',['cont','bin','string','string']], IfCPS:['expcps',['string','expcps','expcps']], AppCPS:['expcps',['cont','string','string']], FunCPS:['expcps',['cont','string','contvar','expcps']], FixCPS:['expcps',['cont','string','string','contvar','expcps']],
+};
+const TYPE_NAMES = {const:'const', mon:'mon_op', bin:'bin_op', exp:'exp', cont:'cps_cont', expcps:'exp_cps', contvar:'cont_var', string:'string', int:'int', bool:'bool', float:'float', list:'list', tuple:'tuple', function:'function', unit:'unit'};
+const MON = {IntNegOp:'~', HdOp:'hd', TlOp:'tl', FstOp:'fst', SndOp:'snd'};
+const BIN = {IntPlusOp:'+', IntMinusOp:'-', IntTimesOp:'*', IntDivOp:'/', FloatPlusOp:'+.', FloatMinusOp:'-.', FloatTimesOp:'*.', FloatDivOp:'/.', ConcatOp:'^', ConsOp:'::', CommaOp:',', EqOp:'=', GreaterOp:'>'};
+const UNIT = {unit:true};
+const C = (c, ...args) => ({c, args});
+
+class OErr extends Error { constructor(msg, pos) { super(msg); this.pos = pos; } }
+
+function typeOf(v) {
+  if (typeof v === 'string') return 'string';
+  if (typeof v === 'boolean') return 'bool';
+  if (typeof v === 'number') return Number.isInteger(v) ? 'int' : 'float';
+  if (typeof v === 'function') return 'function';
+  if (Array.isArray(v)) return 'list';
+  if (v && v.c) return CTORS[v.c][0];
+  if (v && v.tuple) return 'tuple';
+  return 'unit';
+}
+const fits = (v, ty) => ty === 'float' ? typeof v === 'number' : typeOf(v) === ty;
+const clip = (s, n = 70) => s.length > n ? s.slice(0, n - 1) + '…' : s;
+const describe = v => `a ${TYPE_NAMES[typeOf(v)]} (${clip(showVal(v))})`;
+
+function showVal(v) {
+  if (typeof v === 'string') return JSON.stringify(v);
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  if (typeof v === 'function') return '<fun>';
+  if (Array.isArray(v)) return '[' + v.map(showVal).join('; ') + ']';
+  if (v.tuple) return '(' + v.items.map(showVal).join(', ') + ')';
+  if (v.unit) return '()';
+  if (!v.args.length) return v.c;
+  if (v.args.length === 1) {
+    const a = v.args[0], s = showVal(a);
+    return v.c + ' ' + ((a && a.c && a.args.length) || (typeof a === 'number' && a < 0) ? '(' + s + ')' : s);
+  }
+  return v.c + ' (' + v.args.map(showVal).join(', ') + ')';
+}
+
+// ---------- printers (ports of common.ml) ----------
+function sConst(c) {
+  const a = c.args[0];
+  switch (c.c) {
+    case 'BoolConst': return a ? 'true' : 'false';
+    case 'IntConst': return String(a);
+    case 'FloatConst': return Number.isInteger(a) ? a + '.0' : String(a);
+    case 'StringConst': return JSON.stringify(a);
+    case 'NilConst': return '[]';
+    case 'UnitConst': return '()';
+  }
+}
+function sExp(e) {
+  const [a, b, c] = e.args;
+  switch (e.c) {
+    case 'VarExp': return a;
+    case 'ConstExp': return sConst(a);
+    case 'IfExp': return 'if ' + sExp(a) + ' then ' + sExp(b) + ' else ' + sExp(c);
+    case 'MonOpAppExp': return MON[a.c] + ' ' + pExp(b);
+    case 'BinOpAppExp': return a.c === 'CommaOp' ? '(' + pExp(b) + BIN[a.c] + pExp(c) + ')' : pExp(b) + ' ' + BIN[a.c] + ' ' + pExp(c);
+    case 'AppExp': return (a.c === 'AppExp' ? sExp(a) : pExp(a)) + ' ' + pExp(b);
+    case 'FunExp': return 'fun ' + a + ' -> ' + sExp(b);
+    case 'LetInExp': return 'let ' + a + ' = ' + sExp(b) + ' in ' + sExp(c);
+    case 'LetRecInExp': return 'let rec ' + a + ' ' + b + ' = ' + sExp(c) + ' in ' + sExp(e.args[3]);
+  }
+}
+const pExp = e => (e.c === 'VarExp' || e.c === 'ConstExp') ? sExp(e) : '(' + sExp(e) + ')';
+function sCps(e) {
+  const [a0, a1, a2, a3, a4] = e.args;
+  switch (e.c) {
+    case 'VarCPS': return pK(a0) + ' ' + a1;
+    case 'ConstCPS': return pK(a0) + ' ' + sConst(a1);
+    case 'MonOpAppCPS': return pK(a0) + '(' + MON[a1.c] + ' ' + a2 + ')';
+    case 'BinOpAppCPS': return pK(a0) + '(' + a2 + ' ' + BIN[a1.c] + ' ' + a3 + ')';
+    case 'IfCPS': return 'IF ' + a0 + ' THEN ' + sCps(a1) + ' ELSE ' + sCps(a2);
+    case 'AppCPS': return '(' + a1 + ' ' + a2 + ' ' + pK(a0) + ')';
+    case 'FunCPS': return pK(a0) + ' (' + funk(a1, a3) + ')';
+    case 'FixCPS': return pK(a0) + '(FIX ' + a1 + '. ' + funk(a2, a4) + ')';
+  }
+}
+const funk = (x, e) => 'FUN ' + x + ' _k -> ' + sCps(e);
+function sK(k) {
+  if (k.c === 'External') return '<external>';
+  if (k.c === 'ContVarCPS') return '_k';
+  return 'FN ' + k.args[0] + ' -> ' + sCps(k.args[1]);
+}
+const pK = k => k.c === 'FnContCPS' ? '(' + sK(k) + ')' : sK(k);
+
+// ---------- helpers from common.ml / earlier problems ----------
+function intToString(n) {
+  const l = [];
+  while (n > 0) { const c = (n - 1) % 26; l.unshift(c); n = (n - (c + 1)) / 26; }
+  return l.map(c => String.fromCharCode(97 + c)).join('');
+}
+function freshFor(lst) { let n = 1; while (lst.includes(intToString(n))) n++; return intToString(n); }
+function fvExp(e) {
+  const [a, b, c, d] = e.args;
+  switch (e.c) {
+    case 'VarExp': return [a];
+    case 'ConstExp': return [];
+    case 'MonOpAppExp': return fvExp(b);
+    case 'BinOpAppExp': return fvExp(b).concat(fvExp(c));
+    case 'IfExp': return fvExp(a).concat(fvExp(b), fvExp(c));
+    case 'AppExp': return fvExp(a).concat(fvExp(b));
+    case 'FunExp': return fvExp(b).filter(y => y !== a);
+    case 'LetInExp': return fvExp(b).concat(fvExp(c).filter(y => y !== a));
+    case 'LetRecInExp': return fvExp(c).filter(y => y !== a && y !== b).concat(fvExp(d).filter(y => y !== a));
+  }
+}
+function fvCps(e) {
+  const [k, a, b, c, d] = e.args;
+  switch (e.c) {
+    case 'VarCPS': return [a].concat(fvK(k));
+    case 'ConstCPS': return fvK(k);
+    case 'MonOpAppCPS': return [b].concat(fvK(k));
+    case 'BinOpAppCPS': return [b, c].concat(fvK(k));
+    case 'IfCPS': return [k].concat(fvCps(a), fvCps(b));
+    case 'AppCPS': return [a, b].concat(fvK(k));
+    case 'FunCPS': return fvK(k).concat(fvCps(c).filter(y => y !== a));
+    case 'FixCPS': return fvK(k).concat(fvCps(d).filter(y => y !== a && y !== b));
+  }
+}
+// Matches common.ml exactly: FnContCPS (x, e) reports fv(e) without removing x.
+function fvK(k) { return k.c === 'FnContCPS' ? fvCps(k.args[1]) : []; }
+
+// ---------- exp_cps_normalize (port of common.ml) ----------
+function normE(sub, fv, e) {
+  const a = e.args;
+  switch (e.c) {
+    case 'VarCPS': return C('VarCPS', normK(sub, fv, a[0]), sub(a[1]));
+    case 'ConstCPS': return C('ConstCPS', normK(sub, fv, a[0]), a[1]);
+    case 'MonOpAppCPS': return C('MonOpAppCPS', normK(sub, fv, a[0]), a[1], sub(a[2]));
+    case 'BinOpAppCPS': return C('BinOpAppCPS', normK(sub, fv, a[0]), a[1], sub(a[2]), sub(a[3]));
+    case 'IfCPS': return C('IfCPS', sub(a[0]), normE(sub, fv, a[1]), normE(sub, fv, a[2]));
+    case 'AppCPS': return C('AppCPS', normK(sub, fv, a[0]), sub(a[1]), sub(a[2]));
+    case 'FunCPS': { const x = a[1]; const ns = n => n === x ? n : sub(n);
+      return C('FunCPS', normK(sub, fv, a[0]), x, a[2], normE(ns, [x, ...fv], a[3])); }
+    case 'FixCPS': { const f = a[1], x = a[2]; const ns = n => (n === x || n === f) ? n : sub(n);
+      return C('FixCPS', normK(sub, fv, a[0]), f, x, a[3], normE(ns, [f, x, ...fv], a[4])); }
+  }
+}
+function normK(sub, fv, k) {
+  if (k.c !== 'FnContCPS') return k;
+  const [y, body] = k.args, ny = freshFor(fv);
+  const ns = n => n === y ? ny : sub(n);
+  return C('FnContCPS', ny, normE(ns, [ny, ...fv], body));
+}
+function allStrings(v, out = new Set()) {
+  if (typeof v === 'string') out.add(v);
+  else if (v && v.args) v.args.forEach(a => allStrings(a, out));
+  return out;
+}
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const shapeOf = v => typeof v === 'string' ? '_' : (v && v.args ? {c: v.c, args: v.args.map(shapeOf)} : v);
+function firstDiff(u, r, path) {
+  if (!(u && u.c) || !(r && r.c)) return same(u, r) ? null : {path, u, r};
+  if (u.c !== r.c) return {path, u, r};
+  for (let i = 0; i < u.args.length; i++) {
+    const d = firstDiff(u.args[i], r.args[i], path.concat(u.c));
+    if (d) return d;
+  }
+  return null;
+}
+
+// ---------- tiny OCaml subset: lexer ----------
+const KW = new Set(['let','rec','in','if','then','else','fun','true','false','begin','end','match','with','function','raise','and']);
+const OPS = ['->','::','<>','&&','||','<=','>=','(',')','[',']',',',';','@','^','=','|','<','>','+','-','*',':'];
+function tokenize(src, arm) {
+  const toks = []; let i = 0;
+  const P = off => ({arm, off});
+  while (i < src.length) {
+    const ch = src[i];
+    if (/\s/.test(ch)) { i++; continue; }
+    if (src.startsWith('(*', i)) {
+      let d = 1, j = i + 2;
+      while (j < src.length && d > 0) {
+        if (src.startsWith('(*', j)) { d++; j += 2; } else if (src.startsWith('*)', j)) { d--; j += 2; } else j++;
+      }
+      if (d > 0) throw new OErr('This comment is never closed with *)', P(i));
+      i = j; continue;
+    }
+    const rest = src.slice(i); let m;
+    if ((m = /^[A-Z][A-Za-z0-9_']*\.[a-z_][A-Za-z0-9_']*/.exec(rest))) { toks.push({k:'id', v:m[0], pos:P(i)}); i += m[0].length; continue; }
+    if ((m = /^[a-z_][A-Za-z0-9_']*/.exec(rest))) { toks.push({k: KW.has(m[0]) ? 'kw' : 'id', v:m[0], pos:P(i)}); i += m[0].length; continue; }
+    if ((m = /^[A-Z][A-Za-z0-9_']*/.exec(rest))) { toks.push({k:'uid', v:m[0], pos:P(i)}); i += m[0].length; continue; }
+    if ((m = /^\d+\.\d*/.exec(rest))) { toks.push({k:'num', v:parseFloat(m[0]), pos:P(i)}); i += m[0].length; continue; }
+    if ((m = /^\d+/.exec(rest))) { toks.push({k:'num', v:parseInt(m[0], 10), pos:P(i)}); i += m[0].length; continue; }
+    if (ch === '"') {
+      let j = i + 1, s = '';
+      while (j < src.length && src[j] !== '"') {
+        if (src[j] === '\\') { const e = src[j + 1]; s += e === 'n' ? '\n' : e === 't' ? '\t' : e; j += 2; }
+        else s += src[j++];
+      }
+      if (j >= src.length) throw new OErr('This string is never closed with "', P(i));
+      toks.push({k:'str', v:s, pos:P(i)}); i = j + 1; continue;
+    }
+    const op = OPS.find(o => rest.startsWith(o));
+    if (op) { toks.push({k:'op', v:op, pos:P(i)}); i += op.length; continue; }
+    throw new OErr(`Unexpected character '${ch}'`, P(i));
+  }
+  toks.push({k:'eof', v:'', pos:P(src.length)});
+  return toks;
+}
+
+// ---------- parser ----------
+function parse(src, arm) {
+  const toks = tokenize(src, arm); let p = 0;
+  const peek = () => toks[p], next = () => toks[p++];
+  const is = (k, v) => toks[p].k === k && (v === undefined || toks[p].v === v);
+  const isOp = v => is('op', v), isKw = v => is('kw', v);
+  const perr = msg => { const t = peek(); return new OErr(msg + (t.k === 'eof' ? ', but your code ended' : `, but found '${t.v}'`), t.pos); };
+  const expect = (k, v, what) => { if (!is(k, v)) throw perr(`Expected ${what || "'" + v + "'"}`); return next(); };
+
+  function expr() {
+    const pos = peek().pos, items = [noTuple()];
+    while (isOp(',')) { next(); items.push(noTuple()); }
+    return items.length === 1 ? items[0] : {t:'tuple', items, pos};
+  }
+  function noTuple() {
+    const pos = peek().pos;
+    if (isKw('let')) return letE();
+    if (isKw('if')) {
+      next(); const c = expr(); expect('kw', 'then');
+      const a = noTuple();
+      if (!isKw('else')) throw perr("Expected 'else' (both branches must produce an exp_cps)");
+      next(); return {t:'if', c, a, b:noTuple(), pos};
+    }
+    if (isKw('fun')) {
+      next(); const ps = [];
+      while (!isOp('->')) { if (is('eof')) throw perr("Expected '->'"); ps.push(pattern()); }
+      if (!ps.length) throw perr('Expected a parameter after fun');
+      next(); return {t:'fun', ps, body:expr(), pos};
+    }
+    if (isKw('match') || isKw('function')) throw new OErr("This checker doesn't support match. Use let ... in, if, and the helper functions; none of the arms need a match.", pos);
+    if (isKw('raise')) { next(); if (startsAtom()) atom(); return {t:'raise', pos}; }
+    return orE();
+  }
+  function pattern() {
+    const t = peek();
+    if (t.k === 'id') { next(); return {p:'var', n:t.v}; }
+    if (isOp('(')) {
+      next();
+      if (isOp(')')) { next(); return {p:'unit'}; }
+      const items = [pattern()];
+      while (isOp(',')) { next(); items.push(pattern()); }
+      expect('op', ')');
+      return items.length === 1 ? items[0] : {p:'tuple', items};
+    }
+    throw perr('Expected a variable name');
+  }
+  function letE() {
+    const pos = next().pos;
+    let rec = false;
+    if (isKw('rec')) { next(); rec = true; }
+    const pat = pattern(), params = [];
+    while (!isOp('=')) { if (is('eof')) throw perr("Expected '='"); params.push(pattern()); }
+    next();
+    let e1 = expr();
+    if (!isKw('in')) throw perr("Expected 'in' (a let inside an arm is `let x = ... in ...`)");
+    next();
+    const e2 = expr();
+    if (params.length) e1 = {t:'fun', ps:params, body:e1, pos};
+    return {t:'let', rec, pat, e1, e2, pos};
+  }
+  function binLeft(sub, ops) {
+    return function () {
+      let l = sub();
+      while (is('op') && ops.includes(peek().v)) { const t = next(); l = {t:'bin', op:t.v, l, r:sub(), pos:t.pos}; }
+      return l;
+    };
+  }
+  function binRight(sub, ops) {
+    const f = function () {
+      const l = sub();
+      if (is('op') && ops.includes(peek().v)) { const t = next(); return {t:'bin', op:t.v, l, r:f(), pos:t.pos}; }
+      return l;
+    };
+    return f;
+  }
+  const addE = binLeft(appE, ['+', '-', '*']);
+  const consE = binRight(addE, ['::']);
+  const concatE = binRight(consE, ['@', '^']);
+  const cmpE = binLeft(concatE, ['=', '<>', '<', '>', '<=', '>=']);
+  const andE = binRight(cmpE, ['&&']);
+  const orE = binRight(andE, ['||']);
+
+  function startsAtom() {
+    const t = peek();
+    return t.k === 'id' || t.k === 'uid' || t.k === 'str' || t.k === 'num' || isKw('true') || isKw('false') || isOp('(') || isOp('[') || isKw('begin');
+  }
+  function appE() {
+    if (is('uid')) {
+      const t = next();
+      return {t:'ctor', n:t.v, arg: startsAtom() ? atom() : null, pos:t.pos};
+    }
+    let f = atom();
+    while (startsAtom()) { const pos = peek().pos; f = {t:'app', f, a:atom(), pos}; }
+    return f;
+  }
+  function atom() {
+    const t = peek();
+    if (t.k === 'id') { next(); return {t:'var', n:t.v, pos:t.pos}; }
+    if (t.k === 'uid') { next(); return {t:'ctor', n:t.v, arg:null, pos:t.pos}; }
+    if (t.k === 'str' || t.k === 'num') { next(); return {t:'lit', v:t.v, pos:t.pos}; }
+    if (isKw('true') || isKw('false')) { next(); return {t:'lit', v:t.v === 'true', pos:t.pos}; }
+    if (isKw('begin')) { next(); const e = expr(); expect('kw', 'end'); return e; }
+    if (isOp('(')) {
+      next();
+      if (isOp(')')) { next(); return {t:'lit', v:UNIT, pos:t.pos}; }
+      const e = expr();
+      if (isOp(':')) { next(); while (!isOp(')') && !is('eof')) next(); }
+      expect('op', ')', "')' to close the '(' opened earlier");
+      return e;
+    }
+    if (isOp('[')) {
+      next(); const items = [];
+      if (!isOp(']')) {
+        items.push(expr());
+        while (isOp(';')) { next(); if (isOp(']')) break; items.push(expr()); }
+      }
+      expect('op', ']', "']'");
+      return {t:'list', items, pos:t.pos};
+    }
+    if (t.k === 'eof') throw new OErr('Your arm is empty. Write the expression that goes after the ->', t.pos);
+    throw perr('Expected an expression');
+  }
+  if (is('eof')) throw new OErr('Your arm is empty. Write the expression that goes after the ->', peek().pos);
+  const ast = expr();
+  if (!is('eof')) {
+    if (isOp('|')) throw perr('Your arm ended early. Only write the body of this one arm, not another match case');
+    throw perr("Your expression ended here. Check your parentheses, or a missing 'in'");
+  }
+  return ast;
+}
+
+// ---------- evaluator ----------
+let steps = 0;
+function hintFor(n) {
+  if (/^_?k[a-z0-9]*$/i.test(n) && n !== 'k') return '. The continuation variable is the constructor Kvar (as a cps_cont: ContVarCPS Kvar).';
+  if (/fresh/i.test(n)) return '. The fresh-name helper is freshFor.';
+  if (/free/i.test(n)) return '. The helpers are freeVarsInExp, freeVarsInContCPS and freeVarsInExpCPS.';
+  if (/^cps/i.test(n)) return '. The recursive call is cps_exp.';
+  return '';
+}
+function bind(pat, v, env, pos) {
+  if (pat.p === 'var') { if (pat.n !== '_') env[pat.n] = v; return; }
+  if (pat.p === 'unit') return;
+  if (!(v && v.tuple) || v.items.length !== pat.items.length) throw new OErr(`This pattern expects a ${pat.items.length}-tuple, but the value is ${describe(v)}`, pos);
+  pat.items.forEach((pp, i) => bind(pp, v.items[i], env, pos));
+}
+function evalE(n, env) {
+  if (++steps > 300000) throw new OErr('Your code ran too long. Look for infinite recursion.', n.pos);
+  switch (n.t) {
+    case 'lit': return n.v;
+    case 'var':
+      if (n.n in env) return env[n.n];
+      throw new OErr(`Unbound value ${n.n}${hintFor(n.n)}`, n.pos);
+    case 'ctor': {
+      const sig = CTORS[n.n];
+      if (!sig) throw new OErr(`Unbound constructor ${n.n}`, n.pos);
+      const want = sig[1], ar = want.length;
+      if (n.arg === null) {
+        if (ar) throw new OErr(`The constructor ${n.n} expects ${ar} argument${ar > 1 ? 's' : ''} (${want.map(t => TYPE_NAMES[t]).join(' * ')}), but it is applied to none`, n.pos);
+        return C(n.n);
+      }
+      if (!ar) throw new OErr(`The constructor ${n.n} takes no arguments`, n.pos);
+      const v = evalE(n.arg, env);
+      let args;
+      if (ar === 1) args = [v];
+      else {
+        if (!(v && v.tuple) || v.items.length !== ar) throw new OErr(`The constructor ${n.n} expects ${ar} arguments (${want.map(t => TYPE_NAMES[t]).join(' * ')}), but it is applied to ${v && v.tuple ? v.items.length : 1}`, n.pos);
+        args = v.items;
+      }
+      args.forEach((a, i) => {
+        if (!fits(a, want[i])) throw new OErr(`${n.n}: argument ${i + 1} should be a ${TYPE_NAMES[want[i]]}, but it is ${describe(a)}`, n.pos);
+      });
+      return {c:n.n, args};
+    }
+    case 'app': {
+      const f = evalE(n.f, env);
+      if (typeof f !== 'function') throw new OErr(`This is ${describe(f)}, not a function, so it cannot be applied`, n.f.pos);
+      const a = evalE(n.a, env);
+      try { return f(a); }
+      catch (e) { if (e instanceof OErr && !e.pos) e.pos = n.pos; throw e; }
+    }
+    case 'tuple': return {tuple:true, items:n.items.map(x => evalE(x, env))};
+    case 'list': return n.items.map(x => evalE(x, env));
+    case 'if': {
+      const c = evalE(n.c, env);
+      if (typeof c !== 'boolean') throw new OErr(`An if condition must be a bool, but this is ${describe(c)}`, n.c.pos);
+      return evalE(c ? n.a : n.b, env);
+    }
+    case 'fun': {
+      const mk = (i, env0) => arg => {
+        const e2 = Object.create(env0);
+        bind(n.ps[i], arg, e2, n.pos);
+        return i + 1 < n.ps.length ? mk(i + 1, e2) : evalE(n.body, e2);
+      };
+      return mk(0, env);
+    }
+    case 'let': {
+      const e2 = Object.create(env);
+      if (n.rec) bind(n.pat, evalE(n.e1, e2), e2, n.pos);
+      else bind(n.pat, evalE(n.e1, env), e2, n.pos);
+      return evalE(n.e2, e2);
+    }
+    case 'raise': throw new OErr('Your arm still raises an exception. Remove the raise and put your code where it is.', n.pos);
+    case 'bin': {
+      if (n.op === '&&' || n.op === '||') {
+        const l = evalE(n.l, env);
+        if (typeof l !== 'boolean') throw new OErr(`${n.op} needs bools`, n.pos);
+        if (n.op === '&&' ? !l : l) return l;
+        return evalE(n.r, env);
+      }
+      const l = evalE(n.l, env), r = evalE(n.r, env);
+      switch (n.op) {
+        case '::': if (!Array.isArray(r)) throw new OErr(`The right side of :: must be a list, but it is ${describe(r)}`, n.pos); return [l, ...r];
+        case '@': if (!Array.isArray(l) || !Array.isArray(r)) throw new OErr(`Both sides of @ must be lists, but got ${describe(Array.isArray(l) ? r : l)}`, n.pos); return l.concat(r);
+        case '^': if (typeof l !== 'string' || typeof r !== 'string') throw new OErr('Both sides of ^ must be strings', n.pos); return l + r;
+        case '=': return same(l, r);
+        case '<>': return !same(l, r);
+        case '<': return l < r; case '>': return l > r; case '<=': return l <= r; case '>=': return l >= r;
+        case '+': case '-': case '*':
+          if (typeof l !== 'number' || typeof r !== 'number') throw new OErr(`${n.op} needs ints`, n.pos);
+          return n.op === '+' ? l + r : n.op === '-' ? l - r : l * r;
+      }
+    }
+  }
+}
+
+function need(v, ty, fn, which = '') {
+  if (!fits(v, ty)) throw new OErr(`${fn} expects ${which}a ${TYPE_NAMES[ty]}, but got ${describe(v)}`);
+}
+function needStrList(v, fn) {
+  if (!Array.isArray(v) || v.some(x => typeof x !== 'string')) throw new OErr(`${fn} expects a string list, but got ${describe(v)}`);
+}
+function baseEnv(cps) {
+  const env = Object.create(null);
+  env.cps_exp = e => k => cps(e, k);
+  env.freshFor = l => { needStrList(l, 'freshFor'); return freshFor(l); };
+  env.freeVarsInExp = e => { need(e, 'exp', 'freeVarsInExp'); return fvExp(e); };
+  env.freeVarsInContCPS = k => { need(k, 'cont', 'freeVarsInContCPS'); return fvK(k); };
+  env.freeVarsInExpCPS = e => { need(e, 'expcps', 'freeVarsInExpCPS'); return fvCps(e); };
+  env['List.mem'] = x => l => { if (!Array.isArray(l)) throw new OErr('List.mem expects a list'); return l.some(y => same(x, y)); };
+  env['List.filter'] = f => l => l.filter(y => f(y) === true);
+  env['List.map'] = f => l => l.map(f);
+  env['List.append'] = a => b => a.concat(b);
+  env['List.rev'] = l => l.slice().reverse();
+  env.not = b => !b;
+  return env;
+}
+
+// ---------- the match arms ----------
+const ORDER = ['VarExp','ConstExp','MonOpAppExp','BinOpAppExp','IfExp','AppExp','LetInExp','LetRecInExp','FunExp'];
+const ARMS = {
+  VarExp: { pat:'VarExp x', call:'x', vars:['x'], types:['string'],
+    cmt:['(*[[x]]k = k x*)'], rule:'[[x]]κ  =  κ x' },
+  ConstExp: { pat:'ConstExp n', call:'n', vars:['n'], types:['const'],
+    cmt:['(*[[c]]k = k c*)'], rule:'[[c]]κ  =  κ c' },
+  MonOpAppExp: { pat:'MonOpAppExp (m, e)', call:'(m, e)', vars:['m','e'], types:['mon','exp'],
+    cmt:['(*[[~ e]]k = [[e]]_(fun r -> k (~ r)) *)'], rule:'[[~ e]]κ  =  [[e]]_(FN r -> κ (~ r))' },
+  BinOpAppExp: { pat:'BinOpAppExp (b, e1, e2)', call:'(b, e1, e2)', vars:['b','e1','e2'], types:['bin','exp','exp'],
+    cmt:['(*[[(e1 + e2)]]k = [[e2]]_ fun s -> [[e1]] _ fun r -> k (r + s)*)'], rule:'[[e1 ⊕ e2]]κ  =  [[e2]]_(FN v2 -> [[e1]]_(FN v1 -> κ (v1 ⊕ v2)))' },
+  IfExp: { pat:'IfExp (e1,e2,e3)', call:'(e1,e2,e3)', vars:['e1','e2','e3'], types:['exp','exp','exp'],
+    cmt:['(*[[if e1 then e2 else e3]]k = [[e1]]_(fun r -> if r then [[e2]]k else [[e3]]k)*)'], rule:'[[if e1 then e2 else e3]]κ  =  [[e1]]_(FN r -> IF r THEN [[e2]]κ ELSE [[e3]]κ)' },
+  AppExp: { pat:'AppExp (e1,e2)', call:'(e1,e2)', vars:['e1','e2'], types:['exp','exp'],
+    cmt:['(*[[e1 e2]]k = [[e2]]_fun v2 -> [[e1]]_fun v1 -> k (v1 v2)*)'], rule:'[[e1 e2]]κ  =  [[e2]]_(FN v2 -> [[e1]]_(FN v1 -> v1 v2 κ))' },
+  LetInExp: { pat:'LetInExp (x,e1,e2)', call:'(x,e1,e2)', vars:['x','e1','e2'], types:['string','exp','exp'],
+    cmt:['(*[[let x = e1 in e2]]k = [[e1]]_fun x -> [[e2]]k) *)'], rule:'[[let x = e1 in e2]]κ  =  [[e1]]_(FN x -> [[e2]]κ)' },
+  LetRecInExp: { pat:'LetRecInExp(f,x,e1,e2)', call:'(f,x,e1,e2)', vars:['f','x','e1','e2'], types:['string','string','exp','exp'],
+    cmt:['(*[[let rec f x = e1 in e2]]k =', '  (FN f -> [[e2]]_k))(FIX f. FUN x -> fn kx => [[e1]]kx) *)'], rule:'[[let rec f x = e1 in e2]]κ  =  (FN f -> [[e2]]κ) (FIX f. FUN x _k -> [[e1]]_k)' },
+  FunExp: { pat:'FunExp (x,e)', call:'(x,e)', vars:['x','e'], types:['string','exp'],
+    cmt:['(*[[fun x -> e]]k = k(fnk x kx -> [[e]]kx) *)'], rule:'[[fun x -> e]]κ  =  κ (FUN x _k -> [[e]]_k)' },
+};
+const REF = {
+  VarExp: 'VarCPS (k, x)',
+  ConstExp: 'ConstCPS (k, n)',
+  MonOpAppExp: 'let r = freshFor (freeVarsInContCPS k) in\ncps_exp e (FnContCPS (r, MonOpAppCPS (k, m, r)))',
+  BinOpAppExp: 'let v2 = freshFor (freeVarsInExp e1 @ freeVarsInContCPS k) in\nlet v1 = freshFor (v2 :: freeVarsInContCPS k) in\ncps_exp e2 (FnContCPS (v2, cps_exp e1 (FnContCPS (v1, BinOpAppCPS (k, b, v1, v2)))))',
+  IfExp: 'let r = freshFor (freeVarsInExp e2 @ freeVarsInExp e3 @ freeVarsInContCPS k) in\ncps_exp e1 (FnContCPS (r, IfCPS (r, cps_exp e2 k, cps_exp e3 k)))',
+  AppExp: 'let v2 = freshFor (freeVarsInExp e1 @ freeVarsInContCPS k) in\nlet v1 = freshFor (v2 :: freeVarsInContCPS k) in\ncps_exp e2 (FnContCPS (v2, cps_exp e1 (FnContCPS (v1, AppCPS (k, v1, v2)))))',
+  LetInExp: 'cps_exp e1 (FnContCPS (x, cps_exp e2 k))',
+  LetRecInExp: 'FixCPS (FnContCPS (f, cps_exp e2 k), f, x, Kvar, cps_exp e1 (ContVarCPS Kvar))',
+  FunExp: 'FunCPS (k, x, Kvar, cps_exp e (ContVarCPS Kvar))',
+};
+const HINTS = {
+  VarExp: ['Nothing to evaluate. Hand x straight to the continuation k.', 'The constructor is VarCPS : cps_cont * string.'],
+  ConstExp: ['Constants go straight to the continuation, just like variables.', 'ConstCPS : cps_cont * const. n is already a const, so pass it as is.'],
+  MonOpAppExp: ['Transform e with a new continuation: it receives e\'s value as r and hands (~ r) to k.',
+    'r is fresh. The body of FN r -> ... mentions only r and whatever is free in k, so r must avoid freeVarsInContCPS k.',
+    'let r = freshFor (________) in\ncps_exp e (FnContCPS (r, MonOpAppCPS (__, __, __)))'],
+  BinOpAppExp: ['Right operand first: transform e2, and inside its continuation transform e1, and inside that one apply the operator.',
+    'You need two fresh names. v2 wraps [[e1]]_(...), which mentions e1\'s free variables and k\'s, so v2 avoids freeVarsInExp e1 @ freeVarsInContCPS k. v1 wraps κ (v1 ⊕ v2), so v1 avoids v2 :: freeVarsInContCPS k.',
+    'let v2 = freshFor (________) in\nlet v1 = freshFor (________) in\ncps_exp e2 (FnContCPS (v2, cps_exp e1 (FnContCPS (v1, BinOpAppCPS (__, __, __, __)))))'],
+  IfExp: ['Transform the condition e1. Its continuation receives the bool as r and branches with IfCPS. Both branches are transformed with the same k.',
+    'r wraps IF r THEN [[e2]]k ELSE [[e3]]k, so it must avoid the free variables of e2, e3 and k.',
+    'let r = freshFor (________) in\ncps_exp e1 (FnContCPS (r, IfCPS (__, ____, ____)))'],
+  AppExp: ['Same shape as BinOpAppExp: argument e2 first, then the function e1, then the call.',
+    'v2 avoids freeVarsInExp e1 @ freeVarsInContCPS k. v1 avoids v2 :: freeVarsInContCPS k. The call itself is AppCPS (k, v1, v2): function, argument, continuation.',
+    'let v2 = freshFor (________) in\nlet v1 = freshFor (________) in\ncps_exp e2 (FnContCPS (v2, cps_exp e1 (FnContCPS (v1, AppCPS (__, __, __)))))'],
+  LetInExp: ['A let is like (FN x -> [[e2]]k) applied to e1\'s value, so e1 is transformed with that continuation.',
+    'x comes from the program, so no fresh name. Use FnContCPS (x, ...) directly.'],
+  LetRecInExp: ['Build the recursive function as a value with FixCPS, and pass it to a continuation that binds f and continues with e2.',
+    'FixCPS : cps_cont * string * string * cont_var * exp_cps. The cps_cont is FnContCPS (f, cps_exp e2 k). The body e1 is transformed with ContVarCPS Kvar, the same as in FunExp.'],
+  FunExp: ['A function is already a value: hand it to k right away. Its body is transformed with the function\'s own continuation variable _k.',
+    '_k is the constructor Kvar. As a cps_cont it is ContVarCPS Kvar. FunCPS : cps_cont * string * cont_var * exp_cps.'],
+};
+
+const SOURCES = {};
+const ARM_HEADER = /^\s*\|?\s*[A-Z]\w*\s*(\([^)]*\)|[a-z_]\w*)?\s*->/;
+function compileArm(key, src, armTag) {
+  // Accept a pasted "| FunExp (x,e) ->" header by blanking it, so error columns still line up.
+  const m = ARM_HEADER.exec(src);
+  const body = m ? ' '.repeat(m[0].length) + src.slice(m[0].length) : src;
+  SOURCES[armTag] = body;
+  return parse(body, armTag);
+}
+function makeCps(asts) {
+  const stack = [];
+  function cps(e, k) {
+    need(e, 'exp', 'cps_exp', 'its first argument to be ');
+    need(k, 'cont', 'cps_exp', 'its second argument to be ');
+    if (stack.includes(e)) throw new OErr(`Infinite recursion: cps_exp was called again on the same expression ${clip(sExp(e), 50)}. Recurse on the sub-expressions instead.`);
+    if (stack.length > 400) throw new OErr('Recursion is too deep. Look for a cps_exp call that never shrinks its input.');
+    const env = Object.create(env0);
+    ARMS[e.c].vars.forEach((v, i) => { env[v] = e.args[i]; });
+    env.k = k;
+    stack.push(e);
+    let r;
+    try { r = evalE(asts[e.c], env); } finally { stack.pop(); }
+    if (!fits(r, 'expcps')) throw new OErr(`Your ${e.c} arm returned ${describe(r)}, but cps_exp must return an exp_cps`, asts[e.c].pos);
+    return r;
+  }
+  const env0 = baseEnv(cps);
+  return cps;
+}
+const REF_ASTS = Object.fromEntries(ORDER.map(k => [k, compileArm(k, REF[k], 'ref:' + k)]));
+const refCps = makeCps(REF_ASTS);
+const evalValue = src => evalE(parse(src, 'test'), baseEnv(() => { throw new Error('no cps'); }));
+
+// ---------- tests ----------
+const KE = 'External', KV = 'ContVarCPS Kvar',
+  KA = 'FnContCPS ("r", BinOpAppCPS (External, IntPlusOp, "r", "a"))',
+  KB = 'FnContCPS ("y", AppCPS (ContVarCPS Kvar, "b", "y"))';
+const TESTS = {
+  VarExp: [['VarExp "x"', KE], ['VarExp "x"', KV], ['VarExp "a"', KA]],
+  ConstExp: [['ConstExp (IntConst 3)', KE], ['ConstExp (BoolConst true)', KV], ['ConstExp (StringConst "hi")', KA]],
+  MonOpAppExp: [['MonOpAppExp (IntNegOp, ConstExp (IntConst 2))', KE], ['MonOpAppExp (HdOp, VarExp "lst")', KA],
+    ['MonOpAppExp (IntNegOp, MonOpAppExp (IntNegOp, VarExp "a"))', KV], ['MonOpAppExp (FstOp, VarExp "p")', KB]],
+  BinOpAppExp: [['BinOpAppExp (IntPlusOp, ConstExp (IntConst 1), ConstExp (IntConst 2))', KE],
+    ['BinOpAppExp (IntTimesOp, VarExp "a", VarExp "x")', KV], ['BinOpAppExp (IntMinusOp, VarExp "x", VarExp "y")', KA],
+    ['BinOpAppExp (ConcatOp, BinOpAppExp (ConcatOp, VarExp "b", VarExp "a"), ConstExp (StringConst "!"))', KE],
+    ['BinOpAppExp (ConsOp, VarExp "h", VarExp "t")', KB]],
+  IfExp: [['IfExp (ConstExp (BoolConst true), ConstExp (IntConst 1), ConstExp (IntConst 0))', KE],
+    ['IfExp (VarExp "c", VarExp "a", VarExp "b")', KV], ['IfExp (VarExp "c", ConstExp (IntConst 1), ConstExp (IntConst 2))', KA],
+    ['IfExp (BinOpAppExp (GreaterOp, VarExp "x", ConstExp (IntConst 0)), VarExp "x", MonOpAppExp (IntNegOp, VarExp "x"))', KV]],
+  AppExp: [['AppExp (VarExp "f", VarExp "x")', KE], ['AppExp (VarExp "a", ConstExp (IntConst 5))', KV],
+    ['AppExp (VarExp "g", VarExp "y")', KA], ['AppExp (AppExp (VarExp "f", VarExp "x"), VarExp "b")', KV]],
+  LetInExp: [['LetInExp ("x", ConstExp (IntConst 2), VarExp "x")', KE],
+    ['LetInExp ("y", BinOpAppExp (IntPlusOp, VarExp "a", ConstExp (IntConst 1)), BinOpAppExp (IntTimesOp, VarExp "y", VarExp "y"))', KV],
+    ['LetInExp ("x", VarExp "z", LetInExp ("w", VarExp "x", VarExp "w"))', KA]],
+  LetRecInExp: [['LetRecInExp ("f", "x", VarExp "x", AppExp (VarExp "f", ConstExp (IntConst 1)))', KE],
+    ['LetRecInExp ("fact", "n", IfExp (BinOpAppExp (EqOp, VarExp "n", ConstExp (IntConst 0)), ConstExp (IntConst 1), BinOpAppExp (IntTimesOp, VarExp "n", AppExp (VarExp "fact", BinOpAppExp (IntMinusOp, VarExp "n", ConstExp (IntConst 1))))), AppExp (VarExp "fact", ConstExp (IntConst 5)))', KV],
+    ['LetRecInExp ("g", "y", VarExp "y", VarExp "g")', KA]],
+  FunExp: [['FunExp ("x", VarExp "x")', KE], ['FunExp ("x", BinOpAppExp (IntPlusOp, VarExp "x", ConstExp (IntConst 1)))', KV],
+    ['FunExp ("y", AppExp (VarExp "f", VarExp "y"))', KA], ['FunExp ("x", FunExp ("y", VarExp "x"))', KE]],
+};
+const KPOOL = [KE, KV, KA, KB, 'FnContCPS ("c", VarCPS (External, "c"))'].map(evalValue);
+const NAMES = ['a', 'b', 'c', 'x', 'y'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function genExp(d, root) {
+  const tag = root || (d <= 0 ? pick(['VarExp', 'VarExp', 'ConstExp']) : pick(ORDER));
+  const sub = () => genExp(d - 1);
+  switch (tag) {
+    case 'VarExp': return C(tag, pick(NAMES));
+    case 'ConstExp': return C(tag, Math.random() < 0.7 ? C('IntConst', Math.floor(Math.random() * 10)) : C('BoolConst', Math.random() < 0.5));
+    case 'MonOpAppExp': return C(tag, C(pick(Object.keys(MON))), sub());
+    case 'BinOpAppExp': return C(tag, C(pick(['IntPlusOp', 'IntTimesOp', 'IntMinusOp', 'ConcatOp', 'ConsOp', 'EqOp', 'GreaterOp'])), sub(), sub());
+    case 'IfExp': return C(tag, sub(), sub(), sub());
+    case 'AppExp': return C(tag, sub(), sub());
+    case 'FunExp': return C(tag, pick(NAMES), sub());
+    case 'LetInExp': return C(tag, pick(NAMES), sub(), sub());
+    case 'LetRecInExp': return C(tag, pick(['f', 'g']), pick(NAMES), sub(), sub());
+  }
+}
+
+// Runs one test and grades it the way the autograder does: compare after exp_cps_normalize.
+function grade(userCps, e, k) {
+  const expected = refCps(e, k);
+  steps = 0;
+  let got;
+  try { got = userCps(e, k); }
+  catch (err) {
+    if (err instanceof RangeError) err = new OErr('Stack overflow. Your arm probably recurses forever.');
+    if (!(err instanceof OErr)) throw err;
+    return {status:'error', expected, err};
+  }
+  if (same(got, expected)) return {status:'pass', exact:true, expected, got};
+  const fv = [...allStrings(got), ...allStrings(expected), ...allStrings(e), ...allStrings(k)];
+  const ng = normE(s => s, fv, got), ne = normE(s => s, fv, expected);
+  if (same(ng, ne)) return {status:'pass', exact:false, expected, got};
+  const capture = same(shapeOf(got), shapeOf(expected));
+  return {status:'fail', expected, got, capture, diff:firstDiff(ng, ne, [])};
+}
+</script>
+
+<script>
+// ---------- state ----------
+const STORE = 'cpsdrills.v1';
+let state = {cur:'FunExp', hard:false, drafts:{}, all:{}, solved:{}, last:{}};
+try { Object.assign(state, JSON.parse(localStorage.getItem(STORE) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} };
+const hintLevel = {};
+let lastResults = null;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+function hl(src) {
+  const re = /(\(\*[\s\S]*?\*\))|("(?:[^"\\]|\\.)*")|\b(let|rec|in|match|with|open|if|then|else|fun|raise)\b|\b([A-Z][A-Za-z0-9_]*)\b/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const cls = m[1] ? 'cmt' : m[2] ? 'str' : m[3] ? 'kw' : 'ctor';
+    out += `<span class="tok-${cls}">${esc(m[0])}</span>`;
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+const armLine = (key, first) => `${first ? '     ' : '   | '}${ARMS[key].pat} -> cps_exp_${key} ${ARMS[key].call} k cps_exp`;
+const TYPES_SRC = `type cont_var = Kvar                      (* _k *)
+
+type cps_cont =
+   External
+ | ContVarCPS of cont_var                 (* _k *)
+ | FnContCPS of string * exp_cps          (* FN x -> exp_cps *)
+
+and exp_cps =
+   VarCPS of cps_cont * string                            (* K x *)
+ | ConstCPS of cps_cont * const                           (* K c *)
+ | MonOpAppCPS of cps_cont * mon_op * string              (* K (% x) *)
+ | BinOpAppCPS of cps_cont * bin_op * string * string     (* K (x % y) *)
+ | IfCPS of string * exp_cps * exp_cps  (* IF x THEN exp_cps1 ELSE exp_cps2 *)
+ | AppCPS of cps_cont * string * string                   (* x y K *)
+ | FunCPS of cps_cont * string * cont_var * exp_cps
+                                        (* K (FUN x _k -> [[exp]]_k) *)
+ | FixCPS of cps_cont * string * string * cont_var * exp_cps
+                                        (* K (FIX f. FUN x _k -> [[exp]]_k) *)
+
+val freshFor : string list -> string          (* "a", "b", "c", ... first one not in the list *)
+val freeVarsInExp : exp -> string list
+val freeVarsInContCPS : cps_cont -> string list
+val freeVarsInExpCPS : exp_cps -> string list`;
+
+// ---------- nav ----------
+function renderNav() {
+  const nav = document.getElementById('nav');
+  const dot = k => `<span class="dot ${state.solved[k] === true ? 'ok' : state.solved[k] === false ? 'bad' : ''}"></span>`;
+  nav.innerHTML = '<div class="label">One arm at a time</div>' +
+    ORDER.map(k => `<button type="button" data-k="${k}" class="${state.cur === k ? 'on' : ''}">${dot(k)}<code>${k}</code></button>`).join('') +
+    '<div class="label">Final check</div>' +
+    `<button type="button" data-k="ALL" class="exam ${state.cur === 'ALL' ? 'on' : ''}">${dot('ALL')}<code>All 9 arms</code></button>`;
+  nav.querySelectorAll('button').forEach(b => b.onclick = () => { state.cur = b.dataset.k; save(); lastResults = null; render(); });
+  const n = ORDER.filter(k => state.solved[k] === true).length;
+  document.getElementById('progress').innerHTML = `<b>${n}</b> / 9 arms passing`;
+}
+
+// ---------- main ----------
+function scopeChips(key) {
+  const a = ARMS[key];
+  const vars = a.vars.map((v, i) => `<code>${v} <i>: ${TYPE_NAMES[a.types[i]]}</i></code>`).join('');
+  return `<div class="scope"><span class="lbl">In scope</span><code>k <i>: cps_cont</i></code>${vars}<code>cps_exp</code><code>freshFor</code><code>freeVarsInExp</code><code>freeVarsInContCPS</code><code>Kvar</code></div>`;
+}
+function slot(key, val, mode) {
+  return `<span class="slot"><textarea id="ta-${mode}-${key}" data-k="${key}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="write the body of the ${key} arm here" rows="${Math.max(3, (val.match(/\n/g) || []).length + 2)}">${esc(val)}</textarea></span>`;
+}
+function render() {
+  acClose();
+  renderNav();
+  const main = document.getElementById('main');
+  const all = state.cur === 'ALL';
+  const key = state.cur;
+  const hard = state.hard;
+  const header = 'open Common\nopen Plsolution\n\n(* Problem 5 *)\nlet rec cps_exp e k = \n   match e with ';
+  let code = `<pre class="first">${hl(header)}</pre>`;
+  if (all) {
+    ORDER.forEach((k, i) => {
+      const lines = (hard ? [] : ARMS[k].cmt).concat([`${i === 0 ? '     ' : '   | '}${ARMS[k].pat} ->`]);
+      code += `<pre>${hl(lines.join('\n'))}</pre>` + slot(k, state.all[k] || '', 'all');
+    });
+  } else {
+    const others = ORDER.filter(k => k !== key);
+    const lines = [];
+    others.forEach((k, i) => { if (!hard) lines.push(...ARMS[k].cmt); lines.push(armLine(k, i === 0)); });
+    code += `<pre class="dim">${hl(lines.join('\n'))}</pre>`;
+    const tail = ['', '(* Remove the raise and put your code where the raise is now. *)'].concat(hard ? [] : ARMS[key].cmt, [`   | ${ARMS[key].pat} ->`]);
+    code += `<pre>${hl(tail.join('\n'))}</pre>` + slot(key, state.drafts[key] || '', 'one');
+  }
+  code += '<pre class="last"> </pre>';
+
+  const status = state.solved[key] === true ? '<span class="pill ok">Passing</span>' : state.solved[key] === false ? '<span class="pill bad">Not yet</span>' : '<span class="pill">Untried</span>';
+  const title = all ? 'All nine arms, from memory' : `<code>${esc(ARMS[key].pat)}</code>`;
+  const intro = all
+    ? `<p class="empty" style="margin-top:10px">Every arm uses your code here, including the recursive calls. This is the closest to writing the whole function on the exam.</p>`
+    : (hard ? '' : `<div class="rule"><span class="lbl">Rule</span>${esc(ARMS[key].rule)}</div>`) + scopeChips(key);
+  const hints = all ? '' : (HINTS[key].slice(0, hintLevel[key] || 0).map((h, i) => `<div class="hint"><b>Hint ${i + 1}.</b> ${h.includes('\n') ? '<pre>' + hl(h) + '</pre>' : esc(h)}</div>`).join(''));
+  const nh = all ? 0 : HINTS[key].length, used = hintLevel[key] || 0;
+
+  main.innerHTML = `
+  <section class="card">
+    <div class="head"><h1>${title}</h1>${status}</div>
+    ${intro}
+    <div class="editor">${code}</div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="run">Run tests<kbd>⌘↵</kbd></button>
+      ${all ? '' : `<button type="button" class="btn" id="hint" ${used >= nh ? 'disabled' : ''}>${used >= nh ? 'No more hints' : `Hint (${used}/${nh})`}</button>
+      <button type="button" class="btn" id="sol">Show solution</button>`}
+      <button type="button" class="btn" id="clear">Clear</button>
+      ${!all && state.solved[key] === true ? '<button type="button" class="btn" id="nextArm">Next arm →</button>' : ''}
+      <span class="note">Suggestions pop up as you type (Ctrl+Space to open them). Paste just the body, or the whole <code>| ${all ? 'Ctor' : esc(ARMS[key].pat)} -&gt; …</code> line.</span>
+    </div>
+    <div class="hints">${hints}</div>
+    <div class="solution" id="solbox" hidden></div>
+  </section>
+  <section class="card" id="results"></section>
+  <section class="card"><details class="types"><summary>Types and helpers from common.ml</summary><pre>${hl(TYPES_SRC)}</pre>
+    <p>Grading copies the autograder: your output and the reference are both run through <code>exp_cps_normalize</code>, which renames every <code>FN</code>-bound variable. Different fresh names still pass, but a fresh name that captures a free variable fails.</p></details></section>`;
+
+  main.querySelectorAll('textarea').forEach(ta => {
+    attachAC(ta);
+    ta.addEventListener('input', () => {
+      (all ? state.all : state.drafts)[ta.dataset.k] = ta.value;
+      ta.rows = Math.max(3, (ta.value.match(/\n/g) || []).length + 2);
+      save();
+    });
+    ta.addEventListener('keydown', e => {
+      if (e.defaultPrevented) return;
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); run(); }
+      else if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault();
+        const s = ta.selectionStart;
+        ta.setRangeText('   ', s, ta.selectionEnd, 'end');
+        ta.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+  document.getElementById('run').onclick = run;
+  document.getElementById('clear').onclick = () => {
+    if (all) state.all = {}; else delete state.drafts[key];
+    save(); lastResults = null; render();
+  };
+  if (!all) {
+    const hb = document.getElementById('hint');
+    hb.onclick = () => { hintLevel[key] = Math.min(nh, used + 1); keepResults(); };
+    document.getElementById('sol').onclick = () => {
+      const box = document.getElementById('solbox');
+      box.hidden = !box.hidden;
+      box.innerHTML = `<span class="lbl">Reference arm. Try typing it from memory rather than pasting it.</span><pre>${hl(`   | ${ARMS[key].pat} ->\n` + REF[key].split('\n').map(l => '     ' + l).join('\n'))}</pre>`;
+      document.getElementById('sol').textContent = box.hidden ? 'Show solution' : 'Hide solution';
+    };
+    const na = document.getElementById('nextArm');
+    if (na) na.onclick = () => {
+      const i = ORDER.indexOf(key);
+      const rest = ORDER.slice(i + 1).concat(ORDER.slice(0, i));
+      state.cur = rest.find(k => state.solved[k] !== true) || 'ALL';
+      save(); lastResults = null; render();
+    };
+  }
+  renderResults();
+}
+function keepResults() { render(); }
+
+function locate(pos) {
+  if (!pos || !(pos.arm in SOURCES)) return '';
+  const src = SOURCES[pos.arm].slice(0, pos.off);
+  const line = (src.match(/\n/g) || []).length + 1, col = pos.off - src.lastIndexOf('\n');
+  const who = pos.arm.startsWith('user:') ? `your ${pos.arm.slice(5)} arm` : pos.arm.startsWith('ref:') ? `the reference ${pos.arm.slice(4)} arm` : 'a test';
+  return `${who}, line ${line}, col ${col}: `;
+}
+
+// ---------- autocomplete ----------
+// Doc strings are the comments from common.ml.
+const DOCS = {
+  BoolConst:'for true and false', IntConst:'0,1,2, ...', FloatConst:'2.1, 3.0, 5.975, ...', StringConst:'"a", "hi there", ...', NilConst:'[ ]', UnitConst:'( )',
+  IntNegOp:'integer negation', HdOp:'hd', TlOp:'tl', FstOp:'fst', SndOp:'snd',
+  IntPlusOp:'_ + _', IntMinusOp:'_ - _', IntTimesOp:'_ * _', IntDivOp:'_ / _', FloatPlusOp:'_ +. _', FloatMinusOp:'_ -. _', FloatTimesOp:'_ *. _', FloatDivOp:'_ /. _', ConcatOp:'_ ^ _', ConsOp:'_ :: _', CommaOp:'_ , _', EqOp:'_ = _', GreaterOp:'_ > _',
+  VarExp:'variables', ConstExp:'constants', MonOpAppExp:'% exp1 where % is a builtin monadic operator', BinOpAppExp:'exp1 % exp2 where % is a builtin binary operator', IfExp:'if exp1 then exp2 else exp3', AppExp:'exp1 exp2', FunExp:'fun x -> exp1', LetInExp:'let x = exp1 in exp2', LetRecInExp:'let rec f x = exp1 in exp2',
+  Kvar:'_k', External:'<external>', ContVarCPS:'_k', FnContCPS:'FN x -> exp_cps',
+  VarCPS:'K x', ConstCPS:'K c', MonOpAppCPS:'K (% x)', BinOpAppCPS:'K (x % y)', IfCPS:'IF x THEN exp_cps1 ELSE exp_cps2', AppCPS:'x y K', FunCPS:'K (FUN x _k -> [[exp]]_k)', FixCPS:'K (FIX f. FUN x _k -> [[exp]]_k)',
+};
+const FUNCS = [
+  ['cps_exp', 'exp -> cps_cont -> exp_cps', 'the function you are writing; recurse on sub-expressions'],
+  ['freshFor', 'string list -> string', 'first of "a", "b", ..., "z", "aa", ... not in the list'],
+  ['freeVarsInExp', 'exp -> string list', 'free variables of a source expression'],
+  ['freeVarsInContCPS', 'cps_cont -> string list', 'for FnContCPS (x, e) this is fv(e), x is not removed'],
+  ['freeVarsInExpCPS', 'exp_cps -> string list', 'free variables of a CPS expression'],
+  ['List.mem', "'a -> 'a list -> bool", ''], ['List.filter', "('a -> bool) -> 'a list -> 'a list", ''],
+  ['List.map', "('a -> 'b) -> 'a list -> 'b list", ''], ['List.append', "'a list -> 'a list -> 'a list", ''],
+  ['List.rev', "'a list -> 'a list", ''], ['not', 'bool -> bool', ''],
+];
+const AC_BASE = [
+  ...Object.keys(CTORS).map(n => {
+    const [t, a] = CTORS[n];
+    return {label:n, kind:'ctor', pri: ['expcps', 'cont', 'contvar'].includes(t) ? 2 : 4,
+      detail: a.length ? `${a.map(x => TYPE_NAMES[x]).join(' * ')} -> ${TYPE_NAMES[t]}` : TYPE_NAMES[t], doc: DOCS[n] || ''};
+  }),
+  ...FUNCS.map(([label, detail, doc]) => ({label, kind:'fn', pri:1, detail, doc})),
+  ...['let', 'in', 'if', 'then', 'else', 'fun', 'rec'].map(label => ({label, kind:'kw', pri:3, detail:'keyword', doc:''})),
+];
+const KIND_LETTER = {ctor:'C', fn:'ƒ', var:'v', kw:'k'};
+const acBox = document.createElement('div');
+acBox.className = 'ac'; acBox.hidden = true;
+document.body.appendChild(acBox);
+acBox.addEventListener('mousedown', e => e.preventDefault());
+let ac = null, acSuppress = false;
+
+function acItems(ta) {
+  const key = ta.dataset.k, a = ARMS[key];
+  const vars = [{label:'k', kind:'var', pri:0, detail:'cps_cont', doc:'the continuation passed to cps_exp'},
+    ...a.vars.map((v, i) => ({label:v, kind:'var', pri:0, detail:TYPE_NAMES[a.types[i]], doc:`bound by the pattern ${a.pat}`}))];
+  const seen = new Set(vars.map(v => v.label));
+  for (const m of ta.value.matchAll(/\blet\s+(?:rec\s+)?([a-z_][\w']*)/g)) {
+    if (!seen.has(m[1]) && m[1] !== '_') { seen.add(m[1]); vars.push({label:m[1], kind:'var', pri:0, detail:'local', doc:'bound by your let'}); }
+  }
+  return vars.concat(AC_BASE);
+}
+function fuzzy(word, label) {
+  const all = [...Array(word.length).keys()];
+  if (label === word) return {score:-1, idx:all};
+  if (label.startsWith(word)) return {score:0, idx:all};
+  const lw = word.toLowerCase(), ll = label.toLowerCase();
+  if (ll.startsWith(lw)) return {score:1, idx:all};
+  if (ll[0] !== lw[0]) return null;
+  const idx = []; let j = 0;
+  for (let i = 0; i < ll.length && j < lw.length; i++) if (ll[i] === lw[j]) { idx.push(i); j++; }
+  if (j < lw.length) return null;
+  return {score: 2 + (idx[idx.length - 1] - idx.length) * 0.01, idx};
+}
+function acUpdate(ta, force) {
+  const pos = ta.selectionStart;
+  if (pos !== ta.selectionEnd) return acClose();
+  const before = ta.value.slice(0, pos);
+  const line = before.slice(before.lastIndexOf('\n') + 1);
+  if ((line.split('"').length - 1) % 2 === 1 || before.lastIndexOf('(*') > before.lastIndexOf('*)')) return acClose();
+  const m = /[A-Za-z_][A-Za-z0-9_'.]*$/.exec(before);
+  const word = m ? m[0] : '';
+  if (!word && !force) return acClose();
+  const items = acItems(ta).map(it => ({it, m: word ? fuzzy(word, it.label) : {score:0, idx:[]}})).filter(x => x.m)
+    .sort((a, b) => a.m.score - b.m.score || a.it.pri - b.it.pri || a.it.label.localeCompare(b.it.label));
+  if (!items.length || (!force && items.length === 1 && items[0].it.label === word)) return acClose();
+  ac = {ta, word, start: pos - word.length, items: items.slice(0, 50), sel: 0};
+  acRender();
+}
+function acRender() {
+  const {items, sel, ta} = ac;
+  const mark = (s, idx) => [...s].map((ch, i) => idx.includes(i) ? `<b>${esc(ch)}</b>` : esc(ch)).join('');
+  const cur = items[sel].it;
+  acBox.innerHTML = `<ul role="listbox">${items.map((x, i) => `<li role="option" data-i="${i}" class="${i === sel ? 'sel' : ''}" aria-selected="${i === sel}"><span class="ki ki-${x.it.kind}">${KIND_LETTER[x.it.kind]}</span><span class="lb">${mark(x.it.label, x.m.idx)}</span><span class="dt">${esc(x.it.detail)}</span></li>`).join('')}</ul>
+    <div class="doc"><code>${hl(cur.label + ' : ' + cur.detail)}</code>${cur.doc ? `<p>(* ${esc(cur.doc)} *)</p>` : ''}</div>
+    <div class="keys">↑↓ to choose · Tab or Enter to insert · Esc to close</div>`;
+  acBox.querySelectorAll('li').forEach(li => li.onclick = () => acAccept(+li.dataset.i));
+  acBox.hidden = false;
+  const selLi = acBox.querySelector('li.sel');
+  if (selLi) selLi.scrollIntoView({block:'nearest'});
+  const c = caretXY(ta, ac.start), r = ta.getBoundingClientRect();
+  const x = r.left + c.x - ta.scrollLeft, y = r.top + c.y - ta.scrollTop;
+  const w = acBox.offsetWidth, h = acBox.offsetHeight;
+  acBox.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px';
+  acBox.style.top = (y + c.h + h + 8 > innerHeight && y - h - 4 > 0 ? y - h - 4 : y + c.h + 2) + 'px';
+}
+function caretXY(ta, pos) {
+  const cs = getComputedStyle(ta), d = document.createElement('div');
+  ['boxSizing', 'width', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderStyle', 'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'tabSize']
+    .forEach(p => { d.style[p] = cs[p]; });
+  Object.assign(d.style, {position:'absolute', visibility:'hidden', whiteSpace:'pre-wrap', overflowWrap:'break-word', top:'0', left:'-9999px'});
+  d.textContent = ta.value.slice(0, pos);
+  const s = document.createElement('span'); s.textContent = '​'; d.appendChild(s);
+  document.body.appendChild(d);
+  const out = {x: s.offsetLeft, y: s.offsetTop, h: parseFloat(cs.lineHeight) || 20};
+  d.remove();
+  return out;
+}
+function acAccept(i) {
+  const {ta, start, items} = ac, end = ta.selectionStart;
+  acClose();
+  ta.setRangeText(items[i].it.label, start, end, 'end');
+  acSuppress = true; ta.dispatchEvent(new Event('input')); acSuppress = false;
+  ta.focus();
+}
+function acClose() { ac = null; acBox.hidden = true; }
+function attachAC(ta) {
+  ta.addEventListener('input', () => { if (!acSuppress) acUpdate(ta); });
+  ta.addEventListener('keydown', e => {
+    if (e.ctrlKey && (e.key === ' ' || e.code === 'Space')) { e.preventDefault(); acUpdate(ta, true); return; }
+    if (!ac || ac.ta !== ta) return;
+    const n = ac.items.length;
+    if (e.key === 'ArrowDown') { e.preventDefault(); ac.sel = (ac.sel + 1) % n; acRender(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); ac.sel = (ac.sel - 1 + n) % n; acRender(); }
+    else if (e.key === 'Escape') { e.preventDefault(); acClose(); }
+    else if (e.key === 'Tab' || (e.key === 'Enter' && !e.metaKey && !e.ctrlKey && !e.shiftKey)) {
+      // Enter on an already-complete word (e.g. "in") should still make a newline.
+      if (e.key === 'Enter' && ac.items[ac.sel].it.label === ac.word) { acClose(); return; }
+      e.preventDefault(); acAccept(ac.sel);
+    }
+    else if (['ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) acClose();
+  });
+  ta.addEventListener('blur', acClose);
+  ta.addEventListener('mousedown', acClose);
+  ta.addEventListener('scroll', acClose);
+}
+addEventListener('scroll', acClose, true);
+addEventListener('resize', acClose);
+
+// ---------- running ----------
+function run() {
+  const all = state.cur === 'ALL';
+  const keys = all ? ORDER : [state.cur];
+  const asts = {...REF_ASTS};
+  for (const k of keys) {
+    const src = (all ? state.all[k] : state.drafts[k]) || '';
+    try { asts[k] = compileArm(k, src, 'user:' + k); }
+    catch (err) {
+      if (!(err instanceof OErr)) throw err;
+      lastResults = {compile: locate(err.pos) + err.message, key: k};
+      state.solved[state.cur] = false; save(); render(); return;
+    }
+  }
+  const userCps = makeCps(asts);
+  const cases = [];
+  if (all) {
+    ORDER.forEach(k => TESTS[k].forEach(([e, kk]) => cases.push({e:evalValue(e), k:evalValue(kk), tag:k})));
+    for (let i = 0; i < 12; i++) cases.push({e:genExp(3), k:pick(KPOOL), tag:'random'});
+  } else {
+    TESTS[state.cur].forEach(([e, kk]) => cases.push({e:evalValue(e), k:evalValue(kk), tag:'fixed'}));
+    for (let i = 0; i < 6; i++) cases.push({e:genExp(2, state.cur), k:pick(KPOOL), tag:'random'});
+  }
+  const results = cases.map(c => ({...c, ...grade(userCps, c.e, c.k)}));
+  const ok = results.every(r => r.status === 'pass');
+  state.solved[state.cur] = ok;
+  if (all && ok) ORDER.forEach(k => { if (state.solved[k] !== true) state.solved[k] = true; });
+  save();
+  lastResults = {results};
+  render();
+  document.getElementById('results').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+}
+
+function renderResults() {
+  const box = document.getElementById('results');
+  if (!lastResults) {
+    box.innerHTML = `<div class="summary"><h2>Tests</h2></div><p class="empty" style="margin-top:8px">Write the arm above and run the tests. Each run checks hand-picked cases, including ones built to catch variable capture, plus fresh random expressions.</p>`;
+    return;
+  }
+  if (lastResults.compile) {
+    box.innerHTML = `<div class="summary"><h2>Doesn't compile</h2><span class="pill bad">Error</span></div><div class="err" style="margin-top:12px">${esc(lastResults.compile)}</div>`;
+    return;
+  }
+  const rs = lastResults.results, p = rs.filter(r => r.status === 'pass').length, n = rs.length;
+  const sorted = rs.slice().sort((a, b) => (a.status === 'pass') - (b.status === 'pass'));
+  box.innerHTML = `<div class="summary"><h2>Tests</h2><span class="count">${p} / ${n} passed</span>
+      <div class="bar"><i class="p" style="width:${100 * p / n}%"></i><i class="f" style="width:${100 * (n - p) / n}%"></i></div>
+      ${p === n ? '<span class="pill ok">All passing</span>' : '<span class="pill bad">' + (n - p) + ' failing</span>'}</div>
+    <div class="tests">${sorted.map(testCard).join('')}</div>`;
+}
+function testCard(r) {
+  const pill = r.status === 'pass' ? '<span class="pill ok">Pass</span>' : r.status === 'error' ? '<span class="pill bad">Error</span>' : '<span class="pill bad">Fail</span>';
+  let body = '';
+  const raw = `<details><summary>Raw OCaml values</summary><pre>e = ${esc(showVal(r.e))}\nk = ${esc(showVal(r.k))}\n\nexpected = ${esc(showVal(r.expected))}${r.got ? '\n\nyours    = ' + esc(showVal(r.got)) : ''}</pre></details>`;
+  if (r.status === 'pass') {
+    body = `<details><summary>${r.exact ? 'Output (identical to the reference)' : 'Output (same after renaming FN-bound variables; the grader accepts this)'}</summary><pre>${esc(sCps(r.got))}</pre></details>`;
+  } else if (r.status === 'error') {
+    body = `<div class="err" style="margin-top:8px">${esc(locate(r.err.pos) + r.err.message)}</div>
+      <dl class="kv"><dt>expected</dt><dd>${esc(sCps(r.expected))}</dd></dl>${raw}`;
+  } else {
+    let diag = '';
+    if (r.capture) diag = 'The shape is right, but variables are wired wrong. A fresh name probably captures a free variable: check the list you pass to <code>freshFor</code>.';
+    if (r.diff) {
+      const where = r.diff.path.length ? ` inside <code>${r.diff.path.join(' → ')}</code>` : ' at the top';
+      const show = v => typeof v === 'string' ? JSON.stringify(v) : v && v.c ? clip(showVal(v), 90) : String(v);
+      diag += `${diag ? ' ' : ''}First difference${where}: expected <code>${esc(show(r.diff.r))}</code>, yours has <code>${esc(show(r.diff.u))}</code>${r.capture ? ' (after normalizing names)' : ''}.`;
+    }
+    body = `<dl class="kv"><dt>expected</dt><dd>${esc(sCps(r.expected))}</dd><dt>yours</dt><dd>${esc(sCps(r.got))}</dd></dl><div class="diag">${diag}</div>${raw}`;
+  }
+  return `<div class="test ${r.status === 'pass' ? '' : 'fail'}">
+    <div class="row">${pill}<span class="in">[[${esc(sExp(r.e))}]]  with  k = ${esc(sK(r.k))}</span><span class="tag">${r.tag}</span></div>${body}</div>`;
+}
+
+const hardBox = document.getElementById('hard');
+hardBox.checked = !!state.hard;
+hardBox.onchange = () => { state.hard = hardBox.checked; save(); render(); };
+if (!(state.cur in ARMS) && state.cur !== 'ALL') state.cur = 'FunExp';
+render();
+</script>
+
+</html>
