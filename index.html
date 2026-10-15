@@ -734,6 +734,7 @@ function makeCps(asts) {
     if (stack.includes(e)) throw new OErr(`Infinite recursion: cps_exp was called again on the same expression ${clip(sExp(e), 50)}. Recurse on the sub-expressions instead.`);
     if (stack.length > 400) throw new OErr('Recursion is too deep. Look for a cps_exp call that never shrinks its input.');
     const env = Object.create(env0);
+    env.e = e; // the whole matched expression, in scope as in `let rec cps_exp e k = match e with`
     ARMS[e.c].vars.forEach((v, i) => { env[v] = e.args[i]; });
     env.k = k;
     stack.push(e);
